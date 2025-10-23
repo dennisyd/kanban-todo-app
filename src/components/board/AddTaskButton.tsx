@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useSupabase } from '@/components/providers/SupabaseProvider'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import type { TaskInsert, TaskRow } from '@/lib/supabase/types'
 
 interface AddTaskButtonProps {
   columnId: string
@@ -25,13 +26,15 @@ export default function AddTaskButton({ columnId }: AddTaskButtonProps) {
       .order('position', { ascending: false })
       .limit(1)
 
-    const lastPosition = tasks && tasks.length > 0 ? tasks[0].position : 0
+    const lastPosition = tasks && tasks.length > 0 ? (tasks[0] as unknown as TaskRow).position : 0
 
-    await supabase.from('tasks').insert({
+    const newTask: TaskInsert = {
       column_id: columnId,
       title: title.trim(),
       position: lastPosition + 1000,
-    })
+    }
+
+    await (supabase.from('tasks') as any).insert(newTask)
 
     setTitle('')
     setIsAdding(false)

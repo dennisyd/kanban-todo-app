@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
+import type { BoardInsert, ColumnInsert } from '@/lib/supabase/types'
 
 export default function CreateBoardButton() {
   const [isOpen, setIsOpen] = useState(false)
@@ -23,31 +24,30 @@ export default function CreateBoardButton() {
 
     const { data: { user } } = await supabase.auth.getUser()
     
-    const { data: board, error } = await supabase
-      .from('boards')
-      .insert({
-        user_id: user!.id,
-        title: title.trim(),
-        description: description.trim() || null,
-      })
+    if (!user) return
+    
+    const newBoard: BoardInsert = {
+      user_id: user.id,
+      title: title.trim(),
+      description: description.trim() || null,
+    }
+    
+    const { data: board, error } = await (supabase
+      .from('boards') as any)
+      .insert(newBoard)
       .select()
       .single()
 
     if (!error && board) {
-      const defaultColumns = [
-        { title: 'To Do', position: 0 },
-        { title: 'In Progress', position: 1000 },
-        { title: 'Done', position: 2000 },
+      const defaultColumns: ColumnInsert[] = [
+        { board_id: board.id, title: 'To Do', position: 0 },
+        { board_id: board.id, title: 'In Progress', position: 1000 },
+        { board_id: board.id, title: 'Done', position: 2000 },
       ]
 
-      await supabase
-        .from('columns')
-        .insert(
-          defaultColumns.map(col => ({
-            board_id: board.id,
-            ...col,
-          }))
-        )
+      await (supabase
+        .from('columns') as any)
+        .insert(defaultColumns)
 
       setIsOpen(false)
       setTitle('')

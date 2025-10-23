@@ -7,6 +7,7 @@ import { useSupabase } from '@/components/providers/SupabaseProvider'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
+import type { TaskUpdate } from '@/lib/supabase/types'
 
 interface TaskCardProps {
   task: Task
@@ -30,12 +31,14 @@ export default function TaskCard({ task, isDragging = false }: TaskCardProps) {
     : undefined
 
   const handleSave = async () => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({
-        title: title.trim(),
-        description: description.trim() || null,
-      })
+    const updates: TaskUpdate = {
+      title: title.trim(),
+      description: description.trim() || null,
+    }
+
+    const { error } = await (supabase
+      .from('tasks') as any)
+      .update(updates)
       .eq('id', task.id)
 
     if (!error) {

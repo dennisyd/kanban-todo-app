@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import type { ProfileInsert } from '@/lib/supabase/types'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -21,11 +22,13 @@ export async function GET(request: Request) {
           .single()
 
         if (!profile) {
-          await supabase.from('profiles').insert({
+          const newProfile: ProfileInsert = {
             id: user.id,
             github_username: user.user_metadata.user_name,
             avatar_url: user.user_metadata.avatar_url,
-          })
+          }
+          
+          await (supabase.from('profiles') as any).insert(newProfile)
         }
       }
       

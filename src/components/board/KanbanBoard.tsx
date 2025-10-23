@@ -6,6 +6,7 @@ import { useBoard } from '@/lib/hooks/useBoard'
 import { useSupabase } from '@/components/providers/SupabaseProvider'
 import { calculateNewPosition } from '@/lib/utils/reorder'
 import { ColumnWithTasks, Task } from '@/lib/utils/types'
+import type { TaskUpdate } from '@/lib/supabase/types'
 import Column from './Column'
 import TaskCard from './TaskCard'
 import KeyboardShortcutsHelper from './KeyboardShortcutsHelper'
@@ -121,12 +122,14 @@ export default function KanbanBoard({ boardId, initialColumns }: KanbanBoardProp
       nextTask?.position ?? null
     )
 
-    const { error } = await supabase
-      .from('tasks')
-      .update({
-        column_id: targetColumnId,
-        position: newPosition,
-      })
+    const updates: TaskUpdate = {
+      column_id: targetColumnId,
+      position: newPosition,
+    }
+
+    const { error } = await (supabase
+      .from('tasks') as any)
+      .update(updates)
       .eq('id', taskId)
 
     if (error) {
