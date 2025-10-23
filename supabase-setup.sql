@@ -190,3 +190,7 @@ CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks
 ALTER PUBLICATION supabase_realtime ADD TABLE columns;
 ALTER PUBLICATION supabase_realtime ADD TABLE tasks;
 
+-- Enable full row data in realtime payloads (includes all fields in payload.old)
+ALTER TABLE columns REPLICA IDENTITY FULL;
+ALTER TABLE tasks REPLICA IDENTITY FULL;
+
